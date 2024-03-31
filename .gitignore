@@ -1,0 +1,9 @@
+scripts/
+data/
+
+.DS_Store
+molecules_data.json
+
+
+get_molecule_text_pairs.py
+draw_loss.py

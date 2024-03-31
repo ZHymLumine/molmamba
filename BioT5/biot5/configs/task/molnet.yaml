@@ -1,0 +1,93 @@
+# @package _global_
+
+mode: "ft"
+
+data:
+  max_seq_len: 512
+  max_target_len: 8
+  max_num_instances_per_task: 100000
+  add_task_name: False
+  add_task_definition: True
+  num_pos_examples: 0
+  num_neg_examples: 0
+  add_explanation: False
+  tk_instruct: False
+  exec_file_path: biot5/utils/ni_dataset.py
+  data_dir: /raid_elmo/home/lr/zym/MolMamba/data/biot5_data/splits/molnet/bace
+  task_dir: /raid_elmo/home/lr/zym/MolMamba/data/biot5_data/tasks
+
+model:
+  checkpoint_path: ""
+  compile: false
+  dropout: 0.0
+  random_init: true
+  d_model: 768
+  n_layer: 12
+  vocab_size: 33495
+  ssm_cfg:
+    d_state: 16
+    d_conv: 4
+    expand: 2
+    dt_rank: "auto"
+    dt_min: 0.001
+    dt_max: 0.1
+    dt_init: "random"
+    dt_scale: 1.0
+    dt_init_floor: 1e-4
+    conv_bias: true
+    bias: false
+    use_fast_path: true
+  rms_norm: true
+  fused_add_norm: true
+  residual_in_fp32: false
+  pad_vocab_size_multiple: 8
+  pad_token_id: 0
+  # Not in original MambaConfig, but default arg in create_block in mamba_ssm repo; used in layer norm
+  norm_epsilon: 1e-5
+
+  # Used in init_weights
+  initializer_cfg:
+    initializer_range: 0.02
+    rescale_prenorm_residual: true
+    n_residuals_per_layer: 1
+
+  # Caduceus-specific params
+  bidirectional: true,
+  bidirectional_strategy: "add"
+  bidirectional_weight_tie: true
+  rcps: false
+
+  # Used for RCPSEmbedding / RCPSLMHead (will be filled in during model instantiation using info from tokenizer)
+  complement_map: null
+
+optim:
+  name: adamw
+  base_lr: 1e-3
+  batch_size: 128
+  epochs: 100
+  total_steps: 50000
+  warmup_steps: 1000
+  lr_scheduler: cosine
+  weight_decay: 0.0
+  grad_clip: 0.0
+  grad_acc: 8
+  test_bsz_multi: 1
+
+eval:
+  every_steps: 1000
+  steps: 100000 # whole test set
+
+pred:
+  every_steps: 1000
+
+checkpoint:
+  every_steps: 2000
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./logs/finetune_molnet_clintox_ct_tox
+
+test_task: molnet
+result_fn: test_molnet_pred.tsv

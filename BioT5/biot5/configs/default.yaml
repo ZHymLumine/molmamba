@@ -1,0 +1,107 @@
+defaults:
+  - _self_
+  - task: pt
+
+# Experiment args
+mode: "pt"
+device: gpu
+eval_only: false
+predict_only: false
+seed: 2137
+
+tokenizer_name: "google-bert/bert-base-uncased"
+
+model:
+  checkpoint_path: ""
+  compile: false
+  dropout: 0.0
+  random_init: true
+  d_model: 768
+  n_layer: 24
+  vocab_size: 33495
+  ssm_cfg:
+    d_state: 16
+    d_conv: 4
+    expand: 2
+    dt_rank: "auto"
+    dt_min: 0.001
+    dt_max: 0.1
+    dt_init: "random"
+    dt_scale: 1.0
+    dt_init_floor: 1e-4
+    conv_bias: true
+    bias: false
+    use_fast_path: true
+  rms_norm: true
+  fused_add_norm: true
+  residual_in_fp32: false
+  pad_vocab_size_multiple: 8
+  pad_token_id: 0
+  # Not in original MambaConfig, but default arg in create_block in mamba_ssm repo; used in layer norm
+  norm_epsilon: 1e-5
+
+  # Used in init_weights
+  initializer_cfg:
+    initializer_range: 0.02
+    rescale_prenorm_residual: true
+    n_residuals_per_layer: 1
+
+  # Caduceus-specific params
+  bidirectional: true,
+  bidirectional_strategy: "add"
+  bidirectional_weight_tie: true
+  rcps: false
+
+  # Used for RCPSEmbedding / RCPSLMHead (will be filled in during model instantiation using info from tokenizer)
+  complement_map: null
+
+data:
+  input_length: 512
+  target_length: 512
+  mlm_probability: 0.15
+  mean_noise_span_length: 3.0
+  num_workers: 8
+
+optim:
+  name: adamwscale
+  base_lr: 8e-4
+  batch_size: 144
+  total_steps: 350000
+  epochs: -1 # If it's > 0 it overwrites total_steps
+  warmup_steps: 10000
+  lr_scheduler: cosine
+  weight_decay: 0.0
+  grad_clip: 1.0
+  grad_acc: 2
+  final_cosine: 1e-5
+
+eval:
+  every_steps: 10000000 # Don't eval
+  steps: 500
+
+pred:
+  every_steps: 10000000
+
+checkpoint:
+  every_steps: 5000
+
+logging:
+  neptune: false
+  neptune_creds:
+    project:
+    api_token:
+    tags:
+  every_steps: 10
+  grad_l2: true
+  weights_l2: true
+
+hydra:
+  job:
+    chdir: True
+  run:
+    dir: ./logs/${now:%Y-%m-%d}/debug_${now:%H-%M-%S}
+
+output_dir: /raid_elmo/home/lr/zym/MolMamba/pretrain_caduceus_120m_molecule
+molecule_dict: dict/selfies_dict.txt
+pair_data_dir: biot5/data/unimpt
+incontext_data_dir: biot5/data/pubmed/annotation_v1.1_replaced_selfies
