@@ -1,6 +1,6 @@
 scripts/
 data/
-mamba/
+logs/
 
 .DS_Store
 molecules_data.json
