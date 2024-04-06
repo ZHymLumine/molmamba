@@ -1,5 +1,10 @@
 accelerate
+bitsandbytes
 datasets==2.13.1
+deepspeed
+flash-attn==1.0.4
+peft
+gradio
 sentencepiece!=0.1.92
 transformers<=4.33.3
 neptune
@@ -8,6 +13,7 @@ notebook
 protobuf==3.20.*
 pyyaml
 pynvml
+packaging
 hydra-core
 evaluate
 nltk
@@ -18,5 +24,6 @@ selfies
 tabulate
 schedule
 scikit-learn
+wandb
 python-Levenshtein
 fsspec==2023.6.0

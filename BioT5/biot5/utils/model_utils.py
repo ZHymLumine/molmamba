@@ -24,6 +24,7 @@ from .custom_utils import (
     DataCollatorForUnimptT5,
     DataCollatorForMLM,
     DataCollatorForNIMLM,
+    DataCollatorForMolecule,
 )
 import os
 import itertools
@@ -139,7 +140,7 @@ def get_model(args, config, tokenizer, logger):
                 config,
             )
             model = accelerator.prepare(model)
-            accelerator.load_state(args.model.checkpoint_path, strict=True)
+            accelerator.load_state(args.model.checkpoint_path, strict=False)
             # model.resize_token_embeddings(len(tokenizer))
             # model.load_state_dict(torch.load(args.model.checkpoint_path), strict=True)
             torch.cuda.empty_cache()
@@ -401,18 +402,32 @@ def get_data_collator(tokenizer, config, args):
             mlm_probability=args.data.mlm_probability,
         )
     elif args.mode == 'ft':
-        data_collator = DataCollatorForNIMLM(
+        # data_collator = DataCollatorForNIMLM(
+        #     tokenizer,
+        #     padding="longest",
+        #     max_source_length=args.data.max_seq_len,
+        #     max_target_length=args.data.max_target_len,
+        #     label_pad_token_id=-100,
+        #     pad_to_multiple_of=8,
+        #     add_task_name=args.data.add_task_name,
+        #     add_task_definition=args.data.add_task_definition,
+        #     num_pos_examples=args.data.num_pos_examples,
+        #     num_neg_examples=args.data.num_neg_examples,
+        #     add_explanation=args.data.add_explanation,
+        #     tk_instruct=args.data.tk_instruct
+        # )
+        data_collator = DataCollatorForMolecule(
             tokenizer,
             padding="longest",
             max_source_length=args.data.max_seq_len,
             max_target_length=args.data.max_target_len,
             label_pad_token_id=-100,
             pad_to_multiple_of=8,
-            add_task_name=args.data.add_task_name,
-            add_task_definition=args.data.add_task_definition,
+            add_task_name=False,
+            add_task_definition=False,
             num_pos_examples=args.data.num_pos_examples,
             num_neg_examples=args.data.num_neg_examples,
-            add_explanation=args.data.add_explanation,
+            add_explanation=False,
             tk_instruct=args.data.tk_instruct
         )
     else:
@@ -578,7 +593,7 @@ def get_lr_scheduler(optimizer, args, logger):
             total_iters=args.optim.warmup_steps,
             last_epoch=-1,
         )
-
+        
         scheduler2 = CosineAnnealingLR(
             optimizer,
             T_max=args.optim.total_steps - args.optim.warmup_steps,

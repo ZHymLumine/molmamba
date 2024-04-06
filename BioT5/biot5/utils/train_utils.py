@@ -122,7 +122,7 @@ def eval(model, dataloader, logger, args, tokenizer, accelerator):
     averager = Averager()
 
     for batch_id, batch in enumerate(dataloader, start=1):
-        batch = batch.to(accelerator.device)
+        # batch = batch.to(accelerator.device)
         if batch_id == args.eval.corrected_steps * args.optim.grad_acc:
             break
 
@@ -179,17 +179,6 @@ def predict_molnet(model, dataloader, logger, args, tokenizer, accelerator, pref
     eval_metric = metric.compute(tsv_path=os.path.join(args.working_dir, args.result_fn))
 
     if args.test_task == 'molnet':
-        print(f'auroc: {eval_metric["auroc"]}, auprc: {eval_metric["auprc"]}, f1: {eval_metric["f1"]}')
-        # logger.log_stats(
-        #     stats={
-        #         "auroc": eval_metric["auroc"],
-        #         "auprc": eval_metric["auprc"],
-        #         "f1": eval_metric["f1"],
-        #     },
-        #     step=args.current_train_step,
-        #     args=args,
-        #     prefix=f"{prefix}/",
-        # )
         logger.log_stats(
             stats={
                 "accuracy": eval_metric["accuracy"],

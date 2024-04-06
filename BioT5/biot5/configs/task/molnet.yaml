@@ -22,7 +22,7 @@ model:
   dropout: 0.0
   random_init: true
   d_model: 768
-  n_layer: 12
+  n_layer: 24
   vocab_size: 33495
   ssm_cfg:
     d_state: 16
@@ -87,7 +87,7 @@ hydra:
   job:
     chdir: True
   run:
-    dir: ./logs/finetune_molnet_clintox_ct_tox
+    dir: ./logs/finetune_molnet_bace
 
 test_task: molnet
 result_fn: test_molnet_pred.tsv

@@ -1,10 +1,14 @@
 scripts/
 data/
 logs/
-mamba/
 .DS_Store
 molecules_data.json
 
-
+*.egg-info/
 get_molecule_text_pairs.py
 draw_loss.py
+
+*__pycache__/
+*.egg-info/
+build/
+**.so
